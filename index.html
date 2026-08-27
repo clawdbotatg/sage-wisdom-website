@@ -4,130 +4,105 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sage Wisdom — first effective, then efficient</title>
-<meta name="description" content="A skill for your coding agent. Copy it, paste it into your Claude Code or Codex session, and the sage audits your AI pipeline for calls that should be cheaper, faster, or more deterministic — proving each fix with an eval before shipping it.">
+<meta name="description" content="A skill for your coding agent. Copy it, paste it into your Claude Code or Codex session, and the sage scans your AI pipeline for calls that should be cheaper, faster, or more deterministic — proving each fix with an eval before shipping it.">
 <style>
   :root{
     --bg:#12140f;
     --panel:#1a1d16;
     --ink:#e8e6dc;
-    --dim:#9a9a8a;
+    --dim:#8a8f79;
+    --dimmer:#565b48;
     --sage:#9db380;
-    --sage-bright:#c3d4a5;
+    --sage-bright:#c9dba8;
     --line:#2c2f26;
-    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
     background:var(--bg);color:var(--ink);
-    font:17px/1.65 Georgia,"Times New Roman",serif;
+    font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
     display:flex;flex-direction:column;align-items:center;
-    min-height:100vh;padding:0 1.25rem;
+    min-height:100vh;padding:0 1rem;
   }
-  main{max-width:620px;width:100%;padding:4.5rem 0 2rem;text-align:center}
-  .glyph{font-size:3.5rem;line-height:1}
-  h1{
-    font-family:var(--mono);font-size:2.1rem;font-weight:600;
-    color:var(--sage-bright);margin:.75rem 0 1rem;letter-spacing:-.02em;
+  main{width:100%;max-width:920px;padding:3rem 0 2rem;display:flex;flex-direction:column;align-items:center}
+  pre{font-family:inherit;line-height:1.15;white-space:pre}
+  #title{color:var(--sage-bright);text-align:left}
+  #subtitle{color:var(--dim);margin:.9rem 0 2rem;font-size:.85rem;letter-spacing:.12em}
+  #scenewrap{width:100%;display:flex;justify-content:center;overflow:hidden}
+  #scene .cb{color:var(--dimmer)}
+  #scene .ck{color:var(--ink)}
+  #scene .cx{color:var(--sage-bright)}
+  #scene .cs{color:var(--sage)}
+  #scene .cm{color:#6f7a5a}
+  .copyblock{margin:2.75rem 0 0;text-align:center}
+  #copybtn{
+    background:none;border:none;cursor:pointer;
+    font-family:inherit;color:var(--sage-bright);
+    padding:0;
   }
-  .tagline{font-size:1.15rem;margin:0 auto 2.25rem;max-width:34rem}
-  .tagline em{color:var(--sage-bright);font-style:normal}
-  .bigcopy{
-    font-family:var(--mono);font-size:1.15rem;font-weight:600;
-    background:var(--sage);color:#12140f;border:none;border-radius:12px;
-    padding:1rem 2.2rem;cursor:pointer;letter-spacing:.01em;
-    box-shadow:0 0 0 0 rgba(157,179,128,.5);transition:transform .1s,box-shadow .3s;
+  #copybtn pre{line-height:1.2;font-size:1rem}
+  #copybtn:hover{color:#fff}
+  #copybtn.done{color:var(--sage)}
+  .hint{color:var(--dimmer);font-size:.75rem;margin-top:.6rem}
+  .blurb{
+    max-width:34rem;color:var(--dim);font-size:.85rem;line-height:1.7;
+    margin:2.5rem auto 0;text-align:left;
   }
-  .bigcopy:hover{background:var(--sage-bright);transform:translateY(-1px)}
-  .bigcopy:active{transform:translateY(1px)}
-  .bigcopy.done{box-shadow:0 0 0 6px rgba(157,179,128,.18)}
-  .hint{font-family:var(--mono);font-size:.78rem;color:var(--dim);margin-top:.8rem}
-  ol.steps{
-    text-align:left;margin:3rem auto 0;max-width:30rem;
-    list-style:none;counter-reset:step;
-  }
-  ol.steps li{
-    counter-increment:step;position:relative;padding-left:2.6rem;margin:1.1rem 0;
-  }
-  ol.steps li::before{
-    content:counter(step);position:absolute;left:0;top:.1rem;
-    width:1.7rem;height:1.7rem;border-radius:50%;
-    border:1px solid var(--sage);color:var(--sage);
-    font-family:var(--mono);font-size:.85rem;
-    display:flex;align-items:center;justify-content:center;
-  }
-  ol.steps b{color:var(--sage-bright);font-weight:600}
-  ol.steps code{font-family:var(--mono);font-size:.9em;color:var(--sage-bright)}
-  blockquote{
-    margin:3rem auto 0;padding:.25rem 0 .25rem 1.25rem;max-width:30rem;
-    border-left:3px solid var(--sage);color:var(--dim);font-style:italic;text-align:left;
-  }
-  blockquote b{color:var(--ink);font-style:normal}
-  details{
-    margin:2.5rem auto 0;max-width:38rem;text-align:left;
-  }
+  .ladder{color:var(--sage-bright);text-align:center;margin:1rem 0;white-space:pre;overflow-x:auto}
+  .blurb b{color:var(--ink);font-weight:600}
+  .blurb a{color:var(--sage-bright);text-underline-offset:3px}
+  details{margin:2.5rem auto 0;max-width:40rem;width:100%}
   summary{
-    font-family:var(--mono);font-size:.85rem;color:var(--dim);
-    cursor:pointer;text-align:center;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--dimmer);cursor:pointer;text-align:center;font-size:.8rem;
+    letter-spacing:.1em;list-style:none;
   }
   summary:hover{color:var(--sage-bright)}
   pre#skillview{
     margin-top:1rem;background:var(--panel);border:1px solid var(--line);
-    border-radius:10px;padding:1.25rem;max-height:24rem;overflow:auto;
-    font-family:var(--mono);font-size:.78rem;line-height:1.55;color:var(--dim);
+    border-radius:8px;padding:1.25rem;max-height:24rem;overflow:auto;
+    font-size:.72rem;line-height:1.55;color:var(--dim);
     white-space:pre-wrap;word-break:break-word;
   }
   footer{
-    max-width:620px;width:100%;margin-top:auto;padding:2.5rem 0 2rem;
-    border-top:1px solid var(--line);
-    font-family:var(--mono);font-size:.8rem;color:var(--dim);
-    display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;
+    width:100%;max-width:920px;margin-top:auto;padding:2.25rem 0 1.75rem;
+    border-top:1px solid var(--line);font-size:.78rem;color:var(--dimmer);
+    display:flex;gap:1.75rem;flex-wrap:wrap;justify-content:center;
   }
-  footer a{color:var(--dim);text-underline-offset:3px}
+  footer a{color:var(--dimmer);text-underline-offset:3px}
   footer a:hover{color:var(--sage-bright)}
-  @media (max-width:520px){
-    main{padding-top:3rem}
-    h1{font-size:1.7rem}
-    .tagline{font-size:1.02rem}
-  }
 </style>
 </head>
 <body>
 <main>
-  <div class="glyph">🧙</div>
-  <h1>Sage Wisdom</h1>
-  <p class="tagline">A skill for your coding agent. It studies your project,
-  finds the AI calls that should be <em>cheaper</em>, <em>faster</em>, or
-  <em>more deterministic</em> — and proves every fix with an eval before
-  shipping it. Powered by <a href="https://docs.levanto.ai" style="color:var(--sage-bright)">Sage</a>,
-  a classifier+LLM built for exactly these decisions.</p>
+  <pre id="title"></pre>
+  <div id="subtitle">first effective, then efficient</div>
 
-  <button class="bigcopy" id="copybtn">📜 copy the skill</button>
-  <div class="hint">the whole SKILL.md, straight to your clipboard</div>
+  <div id="scenewrap"><pre id="scene"></pre></div>
 
-  <ol class="steps">
-    <li><b>Copy the skill</b> with the button above.</li>
-    <li><b>Paste it</b> into your Claude Code or Codex session, in the folder
-    of your project.</li>
-    <li>The sage audits your pipeline, walks each model call down the descent
-    ladder — <code>frontier&nbsp;LLM → small&nbsp;LLM → Sage → plain&nbsp;code</code> —
-    and offers to prove each fix with a head-to-head eval.</li>
-  </ol>
+  <div class="copyblock">
+    <button id="copybtn" aria-label="copy the skill to your clipboard"><pre id="btnface"></pre></button>
+    <div class="hint">the whole SKILL.md, straight to your clipboard</div>
+  </div>
 
-  <blockquote><b>First effective, then efficient.</b> First you make the thing
-  work, then you ask &ldquo;what did we learn?&rdquo; and make it work
-  better.</blockquote>
+  <div class="blurb"><p><b>sage wisdom</b> is a skill for your coding agent. copy it, paste it
+into a claude code or codex session in your project folder, and it scans
+your ai pipeline the way this belt scans boxes: every llm call gets opened
+up and walked down the ladder --</p>
+<div class="ladder">frontier llm -&gt; small llm -&gt; sage -&gt; plain code</div>
+<p>-- and no fix ships before it wins a head-to-head eval on your real
+traffic. cheaper. faster. more deterministic. powered by
+<a href="https://docs.levanto.ai">sage</a>, a classifier+llm built for exactly these decisions.</p></div>
 
   <details>
-    <summary>read the skill</summary>
+    <summary>[ + read the skill ]</summary>
     <pre id="skillview"></pre>
   </details>
 </main>
 
 <footer>
-  <a href="https://github.com/austintgriffith/sage-wisdom">github</a>
-  <a href="https://docs.levanto.ai">sage docs</a>
-  <a href="https://platform.levanto.ai">get a key</a>
-  <span>MIT</span>
+  <a href="https://github.com/austintgriffith/sage-wisdom">[ github ]</a>
+  <a href="https://docs.levanto.ai">[ sage docs ]</a>
+  <a href="https://platform.levanto.ai">[ get a key ]</a>
+  <span>(mit)</span>
 </footer>
 
 <script type="text/plain" id="skill">
@@ -139,49 +114,56 @@ description: >
   Use when the user wants to cut LLM costs or latency, make an agent pipeline
   more deterministic, find where Levanto Sage fits in their codebase, review
   their AI spend, or asks "make this more efficient" about anything that
-  calls a model. Personified as a sage; powered by the Levanto Sage decision
-  API plus plain judgment about when NOT to use it.
+  calls a model. Powered by the Levanto Sage decision API plus plain
+  judgment about when NOT to use it.
 ---
 
 # Sage Wisdom
-
-You are channeling a sage — a figure in a robe who has watched a thousand
-pipelines burn tokens on questions a smaller mind could answer. The sage's
-creed, learned from building with AI:
 
 > **First effective, then efficient.** First you make the thing work — any
 > model, any cost. Then you ask *"what did we learn?"* and make it work
 > better: cheaper, faster, more deterministic. This skill is the second step,
 > made mechanical.
 
-Personify lightly: warmth and the occasional aphorism in greetings and
-verdicts. Never in the numbers — measurements are delivered straight.
+Deliver everything straight — findings, numbers, verdicts. No persona.
 
 ## 0. First run
 
 Ask, conversationally, at most three questions before touching code:
-1. What do you build, and which repo/pipeline should the sage study?
+1. What do you build, and which repo/pipeline should I study?
 2. What hurts most right now — cost, latency, reliability, or safety?
 3. Is there anything the pipeline must NEVER do (block paying users, leak a
    spoiler, auto-approve)? This decides fail-open vs fail-closed later.
 
-Running the evals needs a `SAGE_API_KEY`. If it's not set, mention it once:
-the audit works without one, but you can't test a fix without it (get a key
-at https://platform.levanto.ai, $14/mo). Never write a key to a tracked file.
+A `SAGE_API_KEY` is needed only when the candidate is Sage. The audit and
+any plain-code swap (P4) run the full eval loop without one. If it's not set,
+mention it once (get a key at https://platform.levanto.ai, $14/mo). Never
+write a key to a tracked file.
 
 ## 1. The discovery pass
 
-Study the repo like a physician, not a salesman. Find every place the
-pipeline spends a model call:
+Find every place the pipeline spends a model call — don't sell anything yet:
 
 - Grep for SDK imports and API calls: `anthropic`, `openai`, `claude-`,
   `gpt-`, `completions`, `messages.create`, `generateText`, fetches to
   inference hosts, LangChain/AI-SDK wrappers.
+- Grep for CLI spend too — it's invisible to the SDK grep and can be the
+  dominant cost: `claude -p`, `claude --`, `codex exec`,
+  `--append-system-prompt`, `$(cat …)` prompt substitution in shell scripts.
+- Read the prompt files as call sites: `*.prompt.md`, skill files that
+  instruct sub-agent fan-outs — the fan-out multiplier often lives in the
+  prompt, not the code.
 - Read the prompts. Note what each call actually produces and what the caller
   does with it — especially output that gets parsed down to a label, score,
   boolean, ranking, or route.
-- Find the loops: cron jobs, queue workers, per-request middleware, CI steps.
-  Volume × tokens × model price = monthly cost. Estimate it per site.
+- Find the loops: cron jobs, launchd plists, queue workers, per-request
+  middleware, CI steps, `while true` pollers — and their retry counts (a
+  40-attempt driver changes the volume math). Volume × tokens × model price
+  = monthly cost. Estimate it per site.
+- If the pipeline runs on OAuth subscriptions instead of a metered API,
+  dollars are the wrong unit. Capacity is 5h/weekly windows per account:
+  estimate window use per job ("one job drains a login's 5h window") and
+  count freed capacity as the win.
 - Check logs/stores for real traffic samples — you will want them for golden
   sets later.
 
@@ -214,8 +196,8 @@ frontier LLM  →  small LLM  →  Sage  →  plain code
   tldr, a rewrite), or it's bulk offline classification where a cheap model
   undercuts Sage's per-unit price and nobody is waiting.
 - **Keep the frontier model** — open-ended reasoning, long-form generation,
-  real agency. Say so plainly; a sage who finds nothing to fix in good code
-  is doing the job.
+  real agency. Say so plainly; finding nothing to fix in good code is doing
+  the job.
 
 Split calls that do double duty. The classic: one prompt that both makes a
 security verdict AND writes a summary. Sage takes the verdict, a small model
@@ -230,7 +212,10 @@ Never implement a swap before it wins an eval. For each accepted proposal:
    actual policy, the actual failure philosophy. Benchmarks against an
    assumed policy are worthless (we have the scar: a whole benchmark
    invalidated because the real sanitizer's "unsafe" was far narrower than
-   the generic definition).
+   the generic definition). And trace what an *error* maps to at every layer
+   that reads the verdict — a transient 500 parsed as "unsafe" has declined
+   a paying job. "What should failure do" and "what does failure actually do"
+   are different questions; check both, at every layer.
 2. **Build a golden set** — 12–20 labeled samples minimum. Prefer replaying
    real traffic from logs/stores; synthesize only to fill gaps, and write
    synthetics to the host's actual policy *including its known
@@ -366,6 +351,21 @@ validate in the field belongs here.)
 - **Eval:** transcript replay; measure routing accuracy and end-to-end
   first-response latency vs the current chain.
 
+### P8 · Fixed fan-out, variable work — from a live engagement
+- **Signature:** a pipeline spawns N agents/calls per job no matter the job's
+  size. Real case: 12 attack agents on every audit — a 470-line job measured
+  ~200k output tokens, most of it the fixed phase. Sibling signature: one
+  stage exempt from the scope scaling the rest of the pipeline has (phase 0
+  always ran the big model while later phases scaled by LOC).
+- **Recipe:** gate each unit on whether it applies to this job. Plain code
+  first (grep for the attack surface: imports, delegatecall, price-feed
+  interfaces); Sage yesno for the ambiguous middle (`Does this contract move
+  value based on an external price?`). Skipping a unit whose whole class is
+  provably absent is a different claim than thinning depth — flag it if the
+  fan-out count is a product promise.
+- **Eval:** replay past jobs gated vs ungated. The gated run must keep every
+  confirmed finding. Report tokens saved next to findings kept.
+
 ## 6. Proposal format
 
 Present findings across four buckets — **speed · cost · security · QA** — as
@@ -387,25 +387,235 @@ Close an engagement by writing down what was learned: the winning phrasings,
 the thresholds and the model version they were swept on, where the golden
 sets live, and any new pattern for §5. Efficient today decays; the evals are
 how it stays efficient. Suggest a monthly re-run of the shootouts — and note
-that a `meta.model` bump is the sage's cue to re-sweep everything.
+that a `meta.model` bump is the cue to re-sweep everything.
 
 > Canonical repo — https://github.com/austintgriffith/sage-wisdom (clone it when you need scripts/, reference.md, or examples/).
 </script>
 <script>
 (function(){
-  var skill=document.getElementById('skill').textContent.trim()+"\n";
-  document.getElementById('skillview').textContent=skill;
-  var btn=document.getElementById('copybtn');
-  btn.addEventListener('click',function(){
-    navigator.clipboard.writeText(skill).then(function(){
-      btn.textContent='✓ copied — now paste it to your agent';
-      btn.classList.add('done');
-      setTimeout(function(){
-        btn.textContent='📜 copy the skill';
-        btn.classList.remove('done');
-      },2500);
-    });
+"use strict";
+
+/* ---------- title ---------- */
+var FONT={
+  S:[" ####","#    "," ### ","    #","#### "],
+  A:[" ### ","#   #","#####","#   #","#   #"],
+  G:[" ####","#    ","#  ##","#   #"," ### "],
+  E:["#####","#    ","###  ","#    ","#####"],
+  W:["#   #","#   #","# # #","## ##","#   #"],
+  I:["###"," # "," # "," # ","###"],
+  D:["#### ","#   #","#   #","#   #","#### "],
+  O:[" ### ","#   #","#   #","#   #"," ### "],
+  M:["#   #","## ##","# # #","#   #","#   #"],
+  " ":["  ","  ","  ","  ","  "]
+};
+function bigText(s){
+  var rows=["","","","",""];
+  for(var i=0;i<s.length;i++){
+    var g=FONT[s[i]];
+    for(var r=0;r<5;r++) rows[r]+=g[r]+" ";
+  }
+  return rows.join("\n");
+}
+var titleText=bigText("SAGE WISDOM");
+document.getElementById("title").textContent=titleText;
+var TITLE_COLS=titleText.split("\n")[0].length;
+
+/* ---------- scene constants ---------- */
+var COLS=100, ROWS=18;
+var BELT_Y=16, ROLL_Y=17, BOX_BOT=15;
+var FR_L=34, FR_R=66;          // scanner frame outer columns
+var WIN_L=FR_L+2, WIN_R=FR_R-2; // x-ray window columns
+var TOP0=4, TOP1=5, TOP2=6;     // scanner top beam rows
+var PILLAR_TOP=7;
+
+var WIZ=[" /\\ ","/__\\","(..)","/||\\"]; // the sage, atop the machine
+var WIZ_X=FR_L+4;
+
+var PAYLOADS=[
+  ["gpt-4 call","$.04 each","x 38k /mo"],
+  ["12k token","prompt for","a yes/no"],
+  ["llm doing","avg() by","vibes"],
+  ["frontier","model on a","cron loop"],
+  ["retry x3","no eval","no golden"],
+  ["3.2s wait","on the","hot path"],
+  ["fenced","json blob","parser rip"],
+  ["temp 0.9","for a","boolean"],
+  ["regex-able","known fmt","llm parse"],
+  ["choice()","conf: 1.0","always"],
+  ["$$$","tok","$$$"],
+  ["??? tokens","nobody","measured"]
+];
+
+/* ---------- grid ---------- */
+var chars=[], cls=[];
+function clearGrid(){
+  for(var r=0;r<ROWS;r++){
+    chars[r]=[]; cls[r]=[];
+    for(var c=0;c<COLS;c++){chars[r][c]=" ";cls[r][c]="cb";}
+  }
+}
+function put(r,c,ch,cl){
+  if(r<0||r>=ROWS||c<0||c>=COLS)return;
+  chars[r][c]=ch; cls[r][c]=cl;
+}
+function text(r,c,s,cl){for(var i=0;i<s.length;i++)put(r,c+i,s[i],cl);}
+
+/* ---------- boxes ---------- */
+function makeBox(){
+  var p=PAYLOADS[Math.floor(Math.random()*PAYLOADS.length)];
+  var maxLen=0;
+  for(var i=0;i<p.length;i++) if(p[i].length>maxLen)maxLen=p[i].length;
+  var iw=maxLen+2+Math.floor(Math.random()*3);
+  var ih=p.length+(Math.random()<0.4?1:0);
+  var w=iw+2, h=ih+2;
+  // center payload in the interior
+  var art=[];
+  var padTop=Math.floor((ih-p.length)/2);
+  for(var r=0;r<ih;r++){
+    var line=(r>=padTop&&r-padTop<p.length)?p[r-padTop]:"";
+    var lp=Math.floor((iw-line.length)/2);
+    art.push(Array(lp+1).join(" ")+line+Array(iw-lp-line.length+1).join(" "));
+  }
+  return {x:-w,w:w,h:h,art:art};
+}
+function drawBox(b){
+  var top=BOX_BOT-b.h+1;
+  for(var j=0;j<b.w;j++){
+    var c=b.x+j;
+    if(c<0||c>=COLS)continue;
+    var xr=(c>=WIN_L&&c<=WIN_R);
+    for(var i=0;i<b.h;i++){
+      var r=top+i, ch, cl;
+      if(i===0||i===b.h-1){          // horizontal borders
+        ch=xr?".":(j===0||j===b.w-1?"+":"-");
+        cl=xr?"cs":"ck";
+      }else if(j===0||j===b.w-1){    // vertical borders
+        ch=xr?":":"|"; cl=xr?"cs":"ck";
+      }else{                          // interior
+        ch=xr?b.art[i-1][j-1]:" ";
+        cl="cx";
+      }
+      put(r,c,ch,cl);
+    }
+  }
+}
+
+/* ---------- scene pieces ---------- */
+function drawBelt(t){
+  for(var c=0;c<COLS;c++){
+    var m=((c-t)%6+6)%6===0;
+    put(BELT_Y,c,m?"o":"=",'cb');
+  }
+  var spin="|/-\\"[t%4];
+  for(var c2=4;c2<COLS;c2+=9)put(ROLL_Y,c2,spin,"cm");
+}
+function drawScanner(t,active){
+  var c;
+  for(c=FR_L+1;c<FR_R;c++)put(TOP0,c,"_","cs");
+  put(TOP1,FR_L,"|","cs");put(TOP1,FR_R,"|","cs");
+  var label=active?("[ SCANNING"+Array(1+(t>>1)%3+1).join(".")+" ]"):"[ SAGE SCAN ]";
+  var inner=FR_R-FR_L-1;
+  var lp=FR_L+1+Math.floor((inner-label.length)/2);
+  for(c=FR_L+1;c<FR_R;c++)put(TOP1,c," ","cs");
+  text(TOP1,lp,label,active?"cx":"cs");
+  put(TOP2,FR_L,"|","cs");put(TOP2,FR_R,"|","cs");
+  for(c=FR_L+1;c<FR_R;c++)put(TOP2,c,"_","cs");
+  for(var r=PILLAR_TOP;r<=ROLL_Y;r++){
+    put(r,FR_L,"|","cs");put(r,FR_L+1,"|","cs");
+    put(r,FR_R-1,"|","cs");put(r,FR_R,"|","cs");
+  }
+  for(var w=0;w<WIZ.length;w++)text(w,WIZ_X,WIZ[w],"cs");
+}
+function drawBeam(t){
+  var span=WIN_R-WIN_L;
+  var x=WIN_L+Math.round((Math.sin(t/5)+1)/2*span);
+  for(var r=PILLAR_TOP;r<=BOX_BOT;r++)put(r,x,":","cm");
+}
+
+/* ---------- render ---------- */
+var esc={"&":"&amp;","<":"&lt;",">":"&gt;"};
+var sceneEl=document.getElementById("scene");
+function render(){
+  var out=[];
+  for(var r=0;r<ROWS;r++){
+    var row="",run="",runCls=null;
+    for(var c=0;c<COLS;c++){
+      var cl=chars[r][c]===" "?runCls||"cb":cls[r][c];
+      if(cl!==runCls&&run!==""){row+='<span class="'+runCls+'">'+run+"</span>";run="";}
+      runCls=cl;
+      var ch=chars[r][c];
+      run+=esc[ch]||ch;
+    }
+    if(run!=="")row+='<span class="'+runCls+'">'+run+"</span>";
+    out.push(row);
+  }
+  sceneEl.innerHTML=out.join("\n");
+}
+
+/* ---------- animation ---------- */
+var boxes=[],tick=0,nextGap=6;
+function seed(){
+  var xs=[64,36,6];
+  for(var i=0;i<xs.length;i++){var b=makeBox();b.x=xs[i];boxes.push(b);}
+}
+function step(){
+  tick++;
+  for(var i=0;i<boxes.length;i++)boxes[i].x++;
+  boxes=boxes.filter(function(b){return b.x<COLS;});
+  var newest=boxes[boxes.length-1];
+  if(!newest||newest.x>nextGap){
+    boxes.push(makeBox());
+    nextGap=6+Math.floor(Math.random()*20);
+  }
+  var active=boxes.some(function(b){return b.x<=WIN_R&&b.x+b.w-1>=WIN_L;});
+  clearGrid();
+  drawBelt(tick);
+  drawBeam(tick);
+  for(var j=0;j<boxes.length;j++)drawBox(boxes[j]);
+  drawScanner(tick,active);
+  render();
+}
+
+/* ---------- responsive fit ---------- */
+function charRatio(){
+  var probe=document.createElement("span");
+  probe.style.cssText="position:absolute;visibility:hidden;white-space:pre;font:100px/1 ui-monospace,'SF Mono',Menlo,Consolas,monospace";
+  probe.textContent="MMMMMMMMMMMMMMMMMMMM";
+  document.body.appendChild(probe);
+  var r=probe.getBoundingClientRect().width/2000;
+  probe.remove();
+  return r;
+}
+function fit(){
+  var ratio=charRatio();
+  var main=document.querySelector("main");
+  var avail=main.clientWidth;
+  sceneEl.style.fontSize=Math.max(4.2,Math.min(13,avail/(COLS*ratio)))+"px";
+  document.getElementById("title").style.fontSize=
+    Math.max(5,Math.min(16,avail/(TITLE_COLS*ratio)))+"px";
+}
+window.addEventListener("resize",fit);
+fit();
+
+seed();
+step();
+if(!window.matchMedia||!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+  setInterval(step,90);
+}
+
+/* ---------- copy the skill ---------- */
+var skill=document.getElementById("skill").textContent.trim()+"\n";
+document.getElementById("skillview").textContent=skill;
+var BTN_IDLE ="+--------------------------+\n|    $ copy the skill      |\n+--------------------------+";
+var BTN_DONE ="+--------------------------+\n|  ok! paste to your agent |\n+--------------------------+";
+var face=document.getElementById("btnface"),btn=document.getElementById("copybtn");
+face.textContent=BTN_IDLE;
+btn.addEventListener("click",function(){
+  navigator.clipboard.writeText(skill).then(function(){
+    face.textContent=BTN_DONE;btn.classList.add("done");
+    setTimeout(function(){face.textContent=BTN_IDLE;btn.classList.remove("done");},2500);
   });
+});
 })();
 </script>
 </body>
